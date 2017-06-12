@@ -298,8 +298,6 @@ public class TeatPictureColorJudge {
 
         long endTime = System.currentTimeMillis();
         System.out.println("程序运行时间："+(endTime-startTime)+"ms");
-     //   System.out.println("程序运行时间："+(endTime-startTime)/1000/60+"min");
-
         return bb;
 
     }

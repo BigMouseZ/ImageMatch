@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="FlexCompilerConfiguration">
+    <option name="HEAP_SIZE_MB" value="8192" />
+    <option name="VM_OPTIONS" value="-Xms700m -Xmx8192m" />
+  </component>
+</project>

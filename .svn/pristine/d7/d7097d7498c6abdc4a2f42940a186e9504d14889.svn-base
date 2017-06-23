@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.signalway.highway.dao.ImageMatchDao.ImageMatchDao">
-
-
     <resultMap id="BaseResultMap" type="com.signalway.highway.entity.MapPojo">
 
 
-
     </resultMap>
-
 
     <select id="ImageMatchBlobList" parameterType="com.signalway.highway.entity.MapQueryPojo" resultType="com.signalway.highway.entity.MapPojo">
         <![CDATA[
@@ -24,20 +20,15 @@
         SELECT *  FROM image_merge_info
            ]]>
            WHERE 1=1
-           <if test="zoom !=null">
-
-               AND zoom = #{zoom,jdbcType=DECIMAL}
-           </if>
-
+        <if test="zoom !=null">
+            AND zoom = #{zoom,jdbcType=DECIMAL}
+        </if>
         <if test="RoadCode !=null">
             AND RoadCode = #{RoadCode,jdbcType=VARCHAR}
         </if>
-
         <if test="id !=null">
-
             AND  id = #{id,jdbcType=DECIMAL}
         </if>
-
     </select>
 
     <insert id="SaveImageMergeInfo" parameterType="com.signalway.highway.entity.MapPojo">
@@ -48,28 +39,13 @@
           x,
           y,
           tile
-
        ) VALUES (
-
         #{type,jdbcType=DECIMAL},
         #{zoom,jdbcType=DECIMAL},
         #{x,jdbcType=DECIMAL},
         #{y,jdbcType=DECIMAL},
          #{tile,jdbcType=BLOB}
-       )
-          ]]>
-
+       ) ]]>
     </insert>
-
-
-
-    <select id="SelectTest" resultType="com.signalway.highway.entity.MapPojo">
-         <![CDATA[
-      SELECT * FROM gmapnetcache  WHERE  y= 14246 AND  x = 26290 AND  zoom=15
-          ]]>
-
-
-
-    </select>
 
 </mapper>

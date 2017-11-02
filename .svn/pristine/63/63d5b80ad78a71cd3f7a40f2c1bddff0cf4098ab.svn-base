@@ -1,0 +1,10 @@
+#
+#默认临时文件路径
+filepath.temp=D:\\ImageMatch\\tempImage\\
+#默认拼接结果存储路径
+filepath.Merge=D:\\ImageMatch\\mergeImage\\
+#图片更新入库9至18级
+#9至14级切割后的图片路径
+filepath.Insert.14=D:\\ImageMatch\\guangxi_s31s40\\S31_S40_14_Insert\\
+#18级切割后的图片路径
+filepath.Insert.18=D:\\ImageMatch\\guangxi_s31s40\\S31_S40_14_Insert\\

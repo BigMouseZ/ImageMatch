@@ -2,6 +2,8 @@ package com.signalway.highway.util;
 
 import com.alibaba.druid.util.StringUtils;
 import com.signalway.highway.entity.MapQueryPojo;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.*;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -13,11 +15,10 @@ import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.*;
+import java.util.Properties;
 
 /**
  * Created by ZhangGang on 2017/6/19.
@@ -29,9 +30,7 @@ public class ImageUtil {
         //读取临时文件
         File file = new File(filePathInfo.getProperty("filepath.temp"));
         File [] files = file.listFiles();
-
         try{
-
             Image image = mergeList(files,mapQueryPojo);
             String mergeImageName = mapQueryPojo.getZoom()+"_"+mapQueryPojo.getXstart()+"_"+mapQueryPojo.getYstart()+"_"+mapQueryPojo.getXend()+"_"+mapQueryPojo.getYend();
             //可以是jpg,png,gif格式
@@ -40,52 +39,62 @@ public class ImageUtil {
             if(!filepath.exists()){
                 filepath.mkdirs();
             }
-            File w2 = new File(filePathInfo.getProperty("filepath.Merge")+mergeImageName+".jpg");
+            File w2 = new File(filePathInfo.getProperty("filepath.Merge")+mergeImageName+"."+filePathInfo.getProperty("filepath.type"));
             //不管输出什么格式图片，此处不需改动
-            ImageIO.write((RenderedImage) image, "jpg", w2);
+            ImageIO.write((RenderedImage) image, filePathInfo.getProperty("filepath.type"), w2);
         }catch (IOException ex){
-
+            //删除临时文件
+            for (File file1 : files) {
+                file1.delete();
+            }
             ex.printStackTrace();
-
-
         }finally {
             //删除临时文件
-            for (int i = 0; i < files.length; i++)
-            {
-                files[i].delete();
+            for (File file1 : files) {
+                file1.delete();
             }
-
         }
 
     }
 
     /*拼接图片*/
-    public static Image mergeList( File [] files, MapQueryPojo mapQueryPojo) throws IOException {
+    private static Image mergeList(File[] files, MapQueryPojo mapQueryPojo) throws IOException {
         int Xnumber = (mapQueryPojo.getXend() - mapQueryPojo.getXstart() + 1);
         int Ynumber = (mapQueryPojo.getYend() - mapQueryPojo.getYstart() + 1);
         int width = Xnumber * 256;
         int height = Ynumber * 256;
         int Xwidth = 0;
         int Yheiht = 0;
-
+        Properties filePathInfo = PropertiesUtils.load("conf/filepath.properties");
         BufferedImage merged = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        Graphics2D g = (Graphics2D) merged.getGraphics();
+        Graphics2D g2d = (Graphics2D) merged.getGraphics();
         try {
-
-            for (int i = 0; i < files.length; i++) {
-
-                File file = files[i];
+            if ("png".equalsIgnoreCase(filePathInfo.getProperty("filepath.type"))) {
+                // ----------  增加下面的代码使得背景透明  -----------------
+                merged = g2d.getDeviceConfiguration().createCompatibleImage(width, height, Transparency.TRANSLUCENT);
+                g2d.dispose();
+                g2d = merged.createGraphics();
+                // ----------  背景透明代码结束  -----------------
+            }
+            System.out.println("图片拼接中，请稍等...");
+            System.out.println("图片拼接结果路径："+filePathInfo.getProperty("filepath.Merge"));
+            for (File file : files) {
                 Image image = ImageIO.read(file);
+                if ("png".equalsIgnoreCase(filePathInfo.getProperty("filepath.type"))) {
+                    //如果拼图是png格式才执行
+                    //纯黑色的图片替换成png图片
+                    if (isBlackColorImg((BufferedImage) image, 1)) {
+                        File pngFile = new File(filePathInfo.getProperty("filepath.type.path"));
+                        image = ImageIO.read(pngFile);
+                    }
+                }
                 String filePath = file.getAbsolutePath();
                 //遍历此路径下的所有jpg文件
                 String[] splits = filePath.split("\\\\");
-                String[] strings = splits[splits.length-1].split("_");
-
-                Yheiht = (Integer.valueOf(strings[1])-mapQueryPojo.getYstart())*256;
-                Xwidth = (Integer.valueOf(strings[2].substring(0,strings[2].length()-4))-mapQueryPojo.getXstart())*256;
-
-                g.drawImage(image, Xwidth, Yheiht, null);
-
+                String[] strings = splits[splits.length - 1].split("_");
+                Yheiht = (Integer.valueOf(strings[1]) - mapQueryPojo.getYstart()) * 256;
+                Xwidth = (Integer.valueOf(strings[2].substring(0, strings[2].length() - 4)) - mapQueryPojo.getXstart()) * 256;
+                g2d.drawImage(image, Xwidth, Yheiht, null);
             }
 
         } catch (Exception ex) {
@@ -106,27 +115,22 @@ public class ImageUtil {
      */
 
     public static boolean TestColor(String imgPath ){
-
-        long startTime = System.currentTimeMillis();//获取当前时间
         boolean bb = false;
         try {
             bb = isSimpleColorImg(imgPath,1);
         } catch (Exception e) {
+            System.out.println("判断图片颜色出错！");
             e.printStackTrace();
         }
-        System.out.println(bb);
-
-        long endTime = System.currentTimeMillis();
-        System.out.println("校验时间："+(endTime-startTime)+"ms");
-
         return bb;
 
     }
 
 
     public  static boolean isSimpleColorImg(String imgPath,float percent) throws IOException {
+        Properties filePathInfo = PropertiesUtils.load("conf/filepath.properties");
         BufferedImage src= ImageIO.read(new File(imgPath));
-
+        int[] rgb = new int[3];
         int height=src.getHeight();
         int width=src.getWidth();
         int count=0,pixTemp=0,pixel=0;
@@ -134,20 +138,53 @@ public class ImageUtil {
         for(int i=0;i<width;i++){
             for(int j=0;j<height;j++){
                 pixel=src.getRGB(i, j);
-                if(pixel==pixTemp) //如果上一个像素点和这个像素点颜色一样的话，就判定为同一种颜色
+                rgb[0] = (pixel & 0xff0000) >> 16;
+                rgb[1] = (pixel & 0xff00) >> 8;
+                rgb[2] = (pixel & 0xff);
+
+                if(rgb[0]==Integer.valueOf(filePathInfo.getProperty("filepath.R"))&&
+                        rgb[1]==Integer.valueOf(filePathInfo.getProperty("filepath.G"))&&
+                        rgb[2]==Integer.valueOf(filePathInfo.getProperty("filepath.B")))  //如果上一个像素点和这个像素点颜色一样的话，就判定为同一种颜色
                     count++;
                 else
                     count=0;
                 if((float)(count+1)/(height*width)>=percent) //如果连续相同的像素点大于设定的百分比的话，就判定为是纯色的图片
                     flag = true;
-                pixTemp=pixel;
             }
         }
         return flag;
     }
 
 
+/*
+* 判断图片是否是纯黑色
+* */
 
+    public  static boolean isBlackColorImg(BufferedImage src,float percent) throws IOException {
+        Properties filePathInfo = PropertiesUtils.load("conf/filepath.properties");
+     //   BufferedImage src= ImageIO.read(new File(imgPath));
+        int[] rgb = new int[3];
+        int height=src.getHeight();
+        int width=src.getWidth();
+        int count=0,pixTemp=0,pixel=0;
+        boolean flag = false;
+        for(int i=0;i<width;i++){
+            for(int j=0;j<height;j++){
+                pixel=src.getRGB(i, j);
+                rgb[0] = (pixel & 0xff0000) >> 16;
+                rgb[1] = (pixel & 0xff00) >> 8;
+                rgb[2] = (pixel & 0xff);
+
+                if(rgb[0]==0&& rgb[1]==0&& rgb[2]==0)  //如果上一个像素点和这个像素点颜色一样的话，就判定为同一种颜色
+                    count++;
+                else
+                    count=0;
+                if((float)(count+1)/(height*width)>=percent) //如果连续相同的像素点大于设定的百分比的话，就判定为是纯色的图片
+                    flag = true;
+            }
+        }
+        return flag;
+    }
     /**
      *
      * param path
@@ -159,14 +196,14 @@ public class ImageUtil {
      * @return
      */
 
-    public static java.util.List getListFiles(String path, String suffix, boolean isdepth, java.util.List<String> list ) {
+    public static List<String> getListFiles(String path, String suffix, boolean isdepth, List<String> list ) {
 
         File file = new File(path);
-        java.util.List<String> relist = listFile(file, suffix, isdepth,list);
+        List<String> relist = listFile(file, suffix, isdepth,list);
         return relist;
     }
 
-    public static java.util.List listFile(File f, String suffix, boolean isdepth, java.util.List<String> fileList ) {
+    public static List<String> listFile(File f, String suffix, boolean isdepth, List<String> fileList ) {
 
         // fileList = new ArrayList<String>();
 

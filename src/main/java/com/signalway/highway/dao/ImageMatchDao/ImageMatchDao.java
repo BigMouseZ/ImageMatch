@@ -4,16 +4,15 @@ import com.signalway.highway.entity.MapPojo;
 import com.signalway.highway.entity.MapQueryPojo;
 import org.apache.ibatis.annotations.Param;
 
-import java.sql.Blob;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by ZhangGang on 2017/5/15.
  */
 public interface ImageMatchDao {
 
-    List<MapPojo> ImageMatchBlobList( MapQueryPojo mapQueryPojo);
+    List<MapPojo> ImageMatchBlobList(MapQueryPojo mapQueryPojo);
     //查询所有点信息
     List<MapQueryPojo> ImageMergeInfoList(MapQueryPojo listQueryPojo);
 
@@ -24,4 +23,9 @@ public interface ImageMatchDao {
     int InsertImageMergeInfoList(List<MapQueryPojo> mapQueryPojos);
 
     List<MapQueryPojo> findAll();
+
+    /*动态建临时表*/
+    int createNewTable(@Param("tableName") String tableName);
+    /*删除表*/
+    int dropTable(@Param("tableName") String tableName);
 }

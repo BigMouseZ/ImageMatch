@@ -2,6 +2,7 @@ package com.signalway.highway.service;
 
 import com.signalway.highway.entity.MapQueryPojo;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -9,10 +10,12 @@ import java.util.List;
  */
 public interface ImageMatchService {
 
-    List<MapQueryPojo> ImageMergeInfoList(MapQueryPojo listQueryPojo);
+    List<MapQueryPojo> ImageMergeInfoList(MapQueryPojo QueryPojo);
 
-    void SaveImageMergeInfo() throws InterruptedException;
+    void SaveImageMergeInfo(File filepath) throws InterruptedException;
 
     void InsertImageMergeInfoList(List<MapQueryPojo> mapQueryPojos);
+
+    int CreateTempTable(String tableName);
 
 }

@@ -1,11 +1,6 @@
 package com.signalway.highway.util;
 
-import org.springframework.core.io.ClassPathResource;
-
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Properties;
 
 /**
@@ -21,10 +16,15 @@ public class PropertiesUtils {
     public static Properties load(String filePath){
         Properties properties = new Properties();
         try {
-            //InputStream oo = Object.class.getResourceAsStream(filePath);
-            InputStream fs=new FileInputStream(new ClassPathResource(filePath).getFile());
-            properties.load(fs);
-            fs.close();
+            //读取外部配置文件加载方式。
+            File file = new File(filePath);
+            FileInputStream fis = new FileInputStream(file);
+            properties.load(fis);
+            fis.close();
+            //读取内部配置文件加载方式
+            /*InputStreamReader isr=new InputStreamReader(new FileInputStream(new ClassPathResource(filePath).getFile()),"utf-8");
+            properties.load(isr);
+            isr.close();*/
         } catch (Exception e) {
             e.printStackTrace();
         }

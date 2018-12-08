@@ -5,7 +5,6 @@ package com.signalway.highway.entity;
  */
 public class MapQueryPojo {
     private Integer id;
-    private Integer ImageCode;
     private Integer type;
     private Integer Xstart;
     private Integer Xend;
@@ -20,14 +19,6 @@ public class MapQueryPojo {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public Integer getImageCode() {
-        return ImageCode;
-    }
-
-    public void setImageCode(Integer imageCode) {
-        ImageCode = imageCode;
     }
 
     public Integer getType() {
@@ -90,7 +81,6 @@ public class MapQueryPojo {
     public String toString() {
         return "MapQueryPojo{" +
                 "id=" + id +
-                ", ImageCode=" + ImageCode +
                 ", type=" + type +
                 ", Xstart=" + Xstart +
                 ", Xend=" + Xend +

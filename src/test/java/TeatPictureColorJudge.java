@@ -1,4 +1,3 @@
-import com.signalway.highway.entity.MapPojo;
 import com.signalway.highway.service.ImageMatchService;
 import org.junit.After;
 import org.junit.Before;
@@ -7,12 +6,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by ZhangGang on 2017/5/24.
@@ -39,7 +32,7 @@ public class TeatPictureColorJudge {
 
         long startTime = System.currentTimeMillis();//获取当前时间
         //图片更新入库
-        imageMatchService.SaveImageMergeInfo();
+       // imageMatchService.SaveImageMergeInfo();
 
         long endTime = System.currentTimeMillis();
 
